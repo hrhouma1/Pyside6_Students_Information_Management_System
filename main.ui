@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Form</class>
+ <widget class="QMainWindow" name="Form">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -12,6 +12,77 @@
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Styles for the info_frame element */
+#info_frame {
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+ 
+/* Styles for labels, input fields, and combo boxes inside &quot;info_frame&quot; */
+#info_frame QLabel,
+#info_frame QLineEdit,
+#info_frame QComboBox,
+#function_frame QPushButton,
+QHeaderView::section {
+  font-family: Segoe UI Semibold;
+  font-size: 12px;
+}
+ 
+/* Styles for input fields and combo boxes inside info_frame */
+#info_frame QLineEdit,
+#info_frame QComboBox {
+  padding: 4px 5px;
+  border: 1px solid #838383;
+  border-radius: 2px;
+}
+ 
+/* Focus styles for input fields and combo boxes */
+#info_frame QLineEdit:focus,
+#info_frame QComboBox:focus {
+  border-color: #005fff;
+}
+ 
+/* Styles for combo boxes drop-down */
+QComboBox::drop-down {
+  background: transparent;
+  border: none;
+  margin-right: 5px;
+}
+ 
+/* Styles for the down-arrow icon in combo boxes */
+QComboBox::down-arrow {
+  image: url(:/icons/expand_more.svg);
+}
+ 
+/* Style for the result_frame */
+#result_frame {
+  border-radius: 5px;
+  background-color: #fff;
+}
+ 
+/* Style for border of QTableWidget */
+QTableWidget {
+  border-radius: 5px;
+  border: 1px solid #0f0f0f;
+}
+ 
+/* Style for table header section */
+QHeaderView::section {
+  border: none;
+  border-bottom: 1px solid #0fc6ff;
+  text-align: left;
+  padding: 3px 5px;
+}
+ 
+/* Styles for table items */
+QTableWidget::item {
+  border-bottom: 1px solid #0fc6ff;
+  color: #000;
+  padding-left: 5px;
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QFrame" name="info_frame">
@@ -374,7 +445,7 @@
       <x>20</x>
       <y>20</y>
       <width>731</width>
-      <height>51</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -386,11 +457,17 @@
     <widget class="QLabel" name="title_label">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>50</x>
        <y>10</y>
-       <width>191</width>
-       <height>21</height>
+       <width>611</width>
+       <height>51</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Blackadder ITC</family>
+       <pointsize>30</pointsize>
+      </font>
      </property>
      <property name="text">
       <string>Students Information System</string>

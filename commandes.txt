@@ -33,3 +33,9 @@ git add .
 git commit -m "Finalisation de l'ajout des Widgets GUI - version 1"
 git push
 
+
+git status
+git add .
+git commit -m "Ajout de la feuille de style pour Forms - QWidget"
+git push
+
