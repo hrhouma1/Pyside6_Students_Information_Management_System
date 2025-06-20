@@ -30,6 +30,6 @@ git push
 
 git status
 git add .
-git commit -m "main.ui - "Finalisation de l'ajout des Widgets GUI - version 1"
+git commit -m "Finalisation de l'ajout des Widgets GUI - version 1"
 git push
 
