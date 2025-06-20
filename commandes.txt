@@ -1,0 +1,23 @@
+
+python3.13 -m venv env
+.\env\Scripts\activate
+pip install pyside6
+pyside6-designer
+git init
+git config --local user.name "hrhouma1"
+git config --local email.name "rhoumahaythem@gmail.com"
+
+git status
+git add .
+git commit -m "Ajout des icônes"
+
+git remote add origin https://github.com/hrhouma1/Pyside6_Students_Information_Management_System.git
+
+git branch -M main
+git push -u origin main
+
+(env) C:\projetspyside6\Pyside6_Students_Information_Management_System>
+
+pyside6-designer
+
+
