@@ -21,3 +21,15 @@ git push -u origin main
 pyside6-designer
 
 
+
+git status
+git add .
+git commit -m "main.ui - "ajout des Widgets de notre interface graphique"
+git push
+
+
+git status
+git add .
+git commit -m "main.ui - "Finalisation de l'ajout des Widgets GUI - version 1"
+git push
+
