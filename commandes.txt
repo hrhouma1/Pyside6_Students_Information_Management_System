@@ -39,3 +39,164 @@ git add .
 git commit -m "Ajout de la feuille de style pour Forms - QWidget"
 git push
 
+
+Feuille de style ajoutée :
+-----------------------------------------------------------------------------------------
+/* Styles for the info_frame element */
+#info_frame {
+  background-color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+ 
+/* Styles for labels, input fields, and combo boxes inside "info_frame" */
+#info_frame QLabel,
+#info_frame QLineEdit,
+#info_frame QComboBox,
+#function_frame QPushButton,
+QHeaderView::section {
+  font-family: Segoe UI Semibold;
+  font-size: 12px;
+}
+ 
+/* Styles for input fields and combo boxes inside info_frame */
+#info_frame QLineEdit,
+#info_frame QComboBox {
+  padding: 4px 5px;
+  border: 1px solid #838383;
+  border-radius: 2px;
+}
+ 
+/* Focus styles for input fields and combo boxes */
+#info_frame QLineEdit:focus,
+#info_frame QComboBox:focus {
+  border-color: #005fff;
+}
+ 
+/* Styles for combo boxes drop-down */
+QComboBox::drop-down {
+  background: transparent;
+  border: none;
+  margin-right: 5px;
+}
+ 
+/* Styles for the down-arrow icon in combo boxes */
+QComboBox::down-arrow {
+  image: url(:/icons/expand_more.svg);
+}
+ 
+/* Style for the result_frame */
+#result_frame {
+  border-radius: 5px;
+  background-color: #fff;
+}
+ 
+/* Style for border of QTableWidget */
+QTableWidget {
+  border-radius: 5px;
+  border: 1px solid #0f0f0f;
+}
+ 
+/* Style for table header section */
+QHeaderView::section {
+  border: none;
+  border-bottom: 1px solid #0fc6ff;
+  text-align: left;
+  padding: 3px 5px;
+}
+ 
+/* Styles for table items */
+QTableWidget::item {
+  border-bottom: 1px solid #0fc6ff;
+  color: #000;
+  padding-left: 5px;
+}
+-----------------------------------------------------------------------------------------
+
+
+
+
+
+
+git clone https://github.com/hrhouma1/Pyside6_Students_Information_Management_System.git
+cd Pyside6_Students_Information_Management_System
+
+python3.13 -m venv env
+# ou py -3.13 -m venv env
+
+.\env\Scripts\activate
+
+pip install pyside6
+
+pyside6-designer
+
+dir env\Scripts\pyside6-*.exe
+
+pyside6-uic.exe  main.ui  -o  main_ui.py
+
+
+1 - Observez le main_ui.py crée correpondant à main.ui   (main.ui  ==> main.ui.py)
+2 - Créer le fichier main.py
+
+
+---------------------------------------
+# Code de main.py
+---------------------------------------
+
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow
+from main_ui import Ui_Form  # Importation de la classe d'interface générée par Qt Designer
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_Form()  # Remplacer par Ui_MainWindow() si nécessaire
+        self.ui.setupUi(self)
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------
+# Annexe et commandes utiles
+---------------------------------------
+
+pyside6-designer
+dir env12\Scripts\pyside6-*.exe
+where pyside6-uic      # doit pointer vers ...\env12\Scripts\pyside6-uic.exe
+pyside6-uic --help     # affiche l’aide du compilateur UI
+pyside6-uic  main.ui  -o  main_ui.py
+
+
+
+env12\Scripts\pyside6-uic.exe  main.ui  -o  main_ui.py
+dir main_ui.py            :: le fichier doit apparaître
+pyside6-uic --version     :: devrait afficher 6.9.1
+python -m pip list | find "PySide6"
+pip install PySide6-Tools==6.9.1
+pyside6-uic main.ui -o main_ui.py
+
+
+
+pyside6-uic --version      :: doit renvoyer « Qt for Python 6.9.1 »
+python -c "import PySide6; print(PySide6.__version__)"
+where pyside6-uic          :: doit pointer vers env12\Scripts
+
+
+
