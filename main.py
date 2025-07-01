@@ -54,7 +54,7 @@ class MainWindow(QMainWindow):
         
         # Ajouter quelques provinces canadiennes par défaut si la base est vide
         if not states:
-            default_provinces = ["Québec", "Ontario", "Colombie-Britannique", "Alberta", "Manitoba", "Saskatchewan", "Nouvelle-Écosse", "Nouveau-Brunswick"]
+            default_provinces = ["Alberta", "Colombie-Britannique", "Manitoba", "Nouveau-Brunswick", "Nouvelle-Écosse", "Ontario", "Québec", "Saskatchewan"]
             self.ui.comboBox.addItems(default_provinces)
     
     def on_state_changed(self, state):
@@ -67,17 +67,17 @@ class MainWindow(QMainWindow):
             # Ajouter des villes canadiennes par défaut selon la province
             if not cities:
                 province_cities = {
-                    "Québec": ["Montréal", "Québec", "Laval", "Gatineau", "Longueuil", "Sherbrooke"],
-                    "Ontario": ["Toronto", "Ottawa", "Mississauga", "Hamilton", "London", "Windsor"],
-                    "Colombie-Britannique": ["Vancouver", "Victoria", "Surrey", "Burnaby", "Richmond"],
                     "Alberta": ["Calgary", "Edmonton", "Red Deer", "Lethbridge", "Medicine Hat"],
+                    "Colombie-Britannique": ["Vancouver", "Victoria", "Surrey", "Burnaby", "Richmond"],
                     "Manitoba": ["Winnipeg", "Brandon", "Steinbach", "Thompson"],
-                    "Saskatchewan": ["Saskatoon", "Regina", "Prince Albert", "Moose Jaw"],
+                    "Nouveau-Brunswick": ["Moncton", "Saint John", "Fredericton", "Dieppe"],
                     "Nouvelle-Écosse": ["Halifax", "Sydney", "Dartmouth", "Truro"],
-                    "Nouveau-Brunswick": ["Moncton", "Saint John", "Fredericton", "Dieppe"]
+                    "Ontario": ["Toronto", "Ottawa", "Mississauga", "Hamilton", "London", "Windsor"],
+                    "Québec": ["Montréal", "Québec", "Laval", "Gatineau", "Longueuil", "Sherbrooke"],
+                    "Saskatchewan": ["Saskatoon", "Regina", "Prince Albert", "Moose Jaw"]
                 }
                 
-                default_cities = province_cities.get(state, ["Montréal", "Toronto", "Vancouver"])
+                default_cities = province_cities.get(state, ["Calgary", "Toronto", "Vancouver"])
                 self.ui.comboBox_2.addItems(default_cities)
     
     def load_students(self):
@@ -90,12 +90,12 @@ class MainWindow(QMainWindow):
         self.ui.tableWidget.setRowCount(len(students))
         
         for row, student in enumerate(students):
-            # student = (student_id, first_name, last_name, city, state, email)
+            # student = (studentId, firstName, lastName, state, city, emailAddress)
             self.ui.tableWidget.setItem(row, 0, QTableWidgetItem(str(student[0])))  # Student ID
             self.ui.tableWidget.setItem(row, 1, QTableWidgetItem(student[1]))       # First Name
             self.ui.tableWidget.setItem(row, 2, QTableWidgetItem(student[2]))       # Last Name
-            self.ui.tableWidget.setItem(row, 3, QTableWidgetItem(student[3]))       # City
-            self.ui.tableWidget.setItem(row, 4, QTableWidgetItem(student[4]))       # State
+            self.ui.tableWidget.setItem(row, 3, QTableWidgetItem(student[4]))       # City
+            self.ui.tableWidget.setItem(row, 4, QTableWidgetItem(student[3]))       # State
             self.ui.tableWidget.setItem(row, 5, QTableWidgetItem(student[5]))       # Email
     
     def get_form_data(self):
@@ -216,7 +216,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_3.setText(self.ui.tableWidget.item(selected_row, 2).text())  # Last Name
         self.ui.lineEdit_6.setText(self.ui.tableWidget.item(selected_row, 5).text())  # Email
         
-        # Définir la province et la ville
+        # Définir la province et la ville (attention: dans MySQL state=index 3, city=index 4)
         state = self.ui.tableWidget.item(selected_row, 4).text()
         city = self.ui.tableWidget.item(selected_row, 3).text()
         

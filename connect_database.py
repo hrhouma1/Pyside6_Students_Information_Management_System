@@ -1,13 +1,17 @@
-import sqlite3
+import mysql.connector
+from mysql.connector import Error
 import os
 from typing import List, Tuple, Optional
 
 class DatabaseManager:
-    def __init__(self, db_path: str = "students.db"):
+    def __init__(self, host: str = "localhost", user: str = "root", password: str = "root", database: str = "db_students"):
         """
         Initialize database connection and create tables if they don't exist
         """
-        self.db_path = db_path
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
         self.create_tables()
     
     def get_connection(self):
@@ -15,36 +19,50 @@ class DatabaseManager:
         Create and return a database connection
         """
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database
+            )
             return conn
-        except sqlite3.Error as e:
-            print(f"Erreur de connexion à la base de données: {e}")
+        except Error as e:
+            print(f"Erreur de connexion à la base de données MySQL: {e}")
             return None
     
     def create_tables(self):
         """
-        Create the students table if it doesn't exist
+        Create the students_info table with the exact schema from SQL Workbench
         """
         conn = self.get_connection()
         if conn:
             try:
                 cursor = conn.cursor()
+                
+                # Drop table if exists to recreate with correct schema
+                cursor.execute("DROP TABLE IF EXISTS students_info")
+                
+                # Create table with your exact SQL schema
                 cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS students (
-                        student_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        first_name TEXT NOT NULL,
-                        last_name TEXT NOT NULL,
-                        city TEXT NOT NULL,
-                        state TEXT NOT NULL,
-                        email TEXT NOT NULL UNIQUE
+                    CREATE TABLE students_info (
+                        studentId INT NOT NULL AUTO_INCREMENT,
+                        firstName VARCHAR(45) NOT NULL,
+                        lastName VARCHAR(45),
+                        state VARCHAR(45),
+                        city VARCHAR(45),
+                        emailAddress VARCHAR(45),
+                        PRIMARY KEY (studentId),
+                        UNIQUE INDEX studentId_UNIQUE (studentId ASC) VISIBLE
                     )
                 """)
                 conn.commit()
-                print("Table 'students' créée avec succès.")
-            except sqlite3.Error as e:
+                print("Table 'students_info' créée avec succès.")
+            except Error as e:
                 print(f"Erreur lors de la création de la table: {e}")
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
     
     def add_student(self, first_name: str, last_name: str, city: str, state: str, email: str) -> bool:
         """
@@ -65,20 +83,22 @@ class DatabaseManager:
             try:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    INSERT INTO students (first_name, last_name, city, state, email)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO students_info (firstName, lastName, city, state, emailAddress)
+                    VALUES (%s, %s, %s, %s, %s)
                 """, (first_name, last_name, city, state, email))
                 conn.commit()
                 print(f"Étudiant {first_name} {last_name} ajouté avec succès.")
                 return True
-            except sqlite3.IntegrityError:
+            except mysql.connector.IntegrityError:
                 print(f"Erreur: L'email {email} existe déjà dans la base de données.")
                 return False
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de l'ajout de l'étudiant: {e}")
                 return False
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return False
     
     def get_all_students(self) -> List[Tuple]:
@@ -92,14 +112,16 @@ class DatabaseManager:
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM students")
+                cursor.execute("SELECT * FROM students_info ORDER BY studentId")
                 students = cursor.fetchall()
                 return students
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la récupération des étudiants: {e}")
                 return []
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return []
     
     def get_student_by_id(self, student_id: int) -> Optional[Tuple]:
@@ -116,14 +138,16 @@ class DatabaseManager:
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM students WHERE student_id = ?", (student_id,))
+                cursor.execute("SELECT * FROM students_info WHERE studentId = %s", (student_id,))
                 student = cursor.fetchone()
                 return student
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la récupération de l'étudiant: {e}")
                 return None
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return None
     
     def update_student(self, student_id: int, first_name: str, last_name: str, 
@@ -147,9 +171,9 @@ class DatabaseManager:
             try:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    UPDATE students 
-                    SET first_name = ?, last_name = ?, city = ?, state = ?, email = ?
-                    WHERE student_id = ?
+                    UPDATE students_info 
+                    SET firstName = %s, lastName = %s, city = %s, state = %s, emailAddress = %s
+                    WHERE studentId = %s
                 """, (first_name, last_name, city, state, email, student_id))
                 
                 if cursor.rowcount > 0:
@@ -159,14 +183,16 @@ class DatabaseManager:
                 else:
                     print(f"Aucun étudiant trouvé avec l'ID {student_id}.")
                     return False
-            except sqlite3.IntegrityError:
+            except mysql.connector.IntegrityError:
                 print(f"Erreur: L'email {email} existe déjà dans la base de données.")
                 return False
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la mise à jour de l'étudiant: {e}")
                 return False
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return False
     
     def delete_student(self, student_id: int) -> bool:
@@ -183,7 +209,7 @@ class DatabaseManager:
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM students WHERE student_id = ?", (student_id,))
+                cursor.execute("DELETE FROM students_info WHERE studentId = %s", (student_id,))
                 
                 if cursor.rowcount > 0:
                     conn.commit()
@@ -192,11 +218,13 @@ class DatabaseManager:
                 else:
                     print(f"Aucun étudiant trouvé avec l'ID {student_id}.")
                     return False
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la suppression de l'étudiant: {e}")
                 return False
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return False
     
     def search_students(self, search_term: str, search_field: str = "all") -> List[Tuple]:
@@ -205,7 +233,7 @@ class DatabaseManager:
         
         Args:
             search_term: The term to search for
-            search_field: The field to search in ('all', 'first_name', 'last_name', 'city', 'state', 'email')
+            search_field: The field to search in ('all', 'firstName', 'lastName', 'city', 'state', 'emailAddress')
             
         Returns:
             List of tuples containing matching student data
@@ -218,23 +246,26 @@ class DatabaseManager:
                 
                 if search_field == "all":
                     cursor.execute("""
-                        SELECT * FROM students 
-                        WHERE first_name LIKE ? OR last_name LIKE ? OR 
-                              city LIKE ? OR state LIKE ? OR email LIKE ?
+                        SELECT * FROM students_info 
+                        WHERE firstName LIKE %s OR lastName LIKE %s OR 
+                              city LIKE %s OR state LIKE %s OR emailAddress LIKE %s
+                        ORDER BY studentId
                     """, (search_term, search_term, search_term, search_term, search_term))
-                elif search_field in ["first_name", "last_name", "city", "state", "email"]:
-                    query = f"SELECT * FROM students WHERE {search_field} LIKE ?"
+                elif search_field in ["firstName", "lastName", "city", "state", "emailAddress"]:
+                    query = f"SELECT * FROM students_info WHERE {search_field} LIKE %s ORDER BY studentId"
                     cursor.execute(query, (search_term,))
                 else:
                     return []
                 
                 students = cursor.fetchall()
                 return students
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la recherche: {e}")
                 return []
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return []
     
     def get_states(self) -> List[str]:
@@ -242,20 +273,22 @@ class DatabaseManager:
         Get all unique states from the database
         
         Returns:
-            List of unique state names
+            List of state names
         """
         conn = self.get_connection()
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT DISTINCT state FROM students ORDER BY state")
+                cursor.execute("SELECT DISTINCT state FROM students_info WHERE state IS NOT NULL ORDER BY state")
                 states = [row[0] for row in cursor.fetchall()]
                 return states
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la récupération des états: {e}")
                 return []
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return []
     
     def get_cities_by_state(self, state: str) -> List[str]:
@@ -272,19 +305,21 @@ class DatabaseManager:
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT DISTINCT city FROM students WHERE state = ? ORDER BY city", (state,))
+                cursor.execute("SELECT DISTINCT city FROM students_info WHERE state = %s AND city IS NOT NULL ORDER BY city", (state,))
                 cities = [row[0] for row in cursor.fetchall()]
                 return cities
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors de la récupération des villes: {e}")
                 return []
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return []
     
     def clear_all_students(self) -> bool:
         """
-        Clear all students from the database
+        Delete all students from the database
         
         Returns:
             bool: True if successful, False otherwise
@@ -293,15 +328,17 @@ class DatabaseManager:
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("DELETE FROM students")
+                cursor.execute("DELETE FROM students_info")
                 conn.commit()
-                print("Tous les étudiants ont été supprimés de la base de données.")
+                print(f"{cursor.rowcount} étudiants supprimés.")
                 return True
-            except sqlite3.Error as e:
-                print(f"Erreur lors de la suppression de tous les étudiants: {e}")
+            except Error as e:
+                print(f"Erreur lors de la suppression des étudiants: {e}")
                 return False
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return False
     
     def get_student_count(self) -> int:
@@ -309,43 +346,36 @@ class DatabaseManager:
         Get the total number of students in the database
         
         Returns:
-            int: Number of students
+            Number of students
         """
         conn = self.get_connection()
         if conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("SELECT COUNT(*) FROM students")
+                cursor.execute("SELECT COUNT(*) FROM students_info")
                 count = cursor.fetchone()[0]
                 return count
-            except sqlite3.Error as e:
+            except Error as e:
                 print(f"Erreur lors du comptage des étudiants: {e}")
                 return 0
             finally:
-                conn.close()
+                if conn.is_connected():
+                    cursor.close()
+                    conn.close()
         return 0
 
-# Fonction utilitaire pour créer une instance de la base de données
-def get_database_manager():
-    """
-    Create and return a DatabaseManager instance
-    """
-    return DatabaseManager()
-
-# Test de la base de données (peut être commenté en production)
+# Test de la connexion si le fichier est exécuté directement
 if __name__ == "__main__":
-    # Test des fonctionnalités de base
     db = DatabaseManager()
     
-    # Test d'ajout d'un étudiant
+    # Test d'ajout
     success = db.add_student("Jean", "Dupont", "Paris", "Île-de-France", "jean.dupont@email.com")
     if success:
         print("Test d'ajout réussi")
     
-    # Test de récupération de tous les étudiants
+    # Test de récupération
     students = db.get_all_students()
     print(f"Nombre d'étudiants: {len(students)}")
     
-    # Affichage des étudiants
     for student in students:
         print(f"ID: {student[0]}, Nom: {student[1]} {student[2]}, Ville: {student[3]}, État: {student[4]}, Email: {student[5]}") 
