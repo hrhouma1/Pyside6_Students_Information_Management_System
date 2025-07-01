@@ -121,6 +121,7 @@ QTableWidget::item {
 git clone https://github.com/hrhouma1/Pyside6_Students_Information_Management_System.git
 cd Pyside6_Students_Information_Management_System
 
+python3.13 --version
 python3.13 -m venv env
 # ou py -3.13 -m venv env
 
@@ -161,7 +162,7 @@ if __name__ == '__main__':
 
 
 
-
+python main.py
 
 
 
